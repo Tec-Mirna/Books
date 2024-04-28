@@ -35,17 +35,29 @@ class Book {
 
     
 
-    //get
+   //Obtener libros
     public function get_books(){
         $response = file_get_contents('https://sheetdb.io/api/v1/qvsm8ms7oiqkr');
         return $response;
     }
 
  
+
+ 
        
 }
 
+   // Verificar si se ha enviado el formulario de agregar un nuevo libro
+   if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addBook"])) {
+    $name = $_POST["name"];
+    $author = $_POST["author"];
+    $category = $_POST["category"];
+    $image = $_POST["image"];
 
+    // Crear un nuevo objeto Book y agregar el libro
+    $book = new Book($name, $author, $category, $image);
+    $book->createBook();
+   }
 
 
 ?>
@@ -125,7 +137,7 @@ class Book {
             <label for="image" class="form-label">Categoría</label>
             <input type="text" class="form-control" id="image" name="image" placeholder="Url">
           </div>
-          <button type="submit" class="btn btn-info">Agregar Libro</button>
+          <button type="submit"  name="addBook" class="btn btn-info">Agregar Libro</button>
         </form>
       </div>
     </div>
@@ -133,8 +145,44 @@ class Book {
 </div>
 
 
+ <!-- Modal para editar libro-->
+ <div class="modal fade" id="addBookModalEdit" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBookModalLabel">Editar Libro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editBookForm" method="post" action="book.php">
+            
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="edit_name" name="name" placeholder="Ingresa el título" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_author" class="form-label">Autor</label>
+                        <input type="text" class="form-control" id="edit_author" name="author" placeholder="Ingresa el nombre del autor" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_category" class="form-label">Categoría</label>
+                        <input type="text" class="form-control" id="edit_category" name="category" placeholder="Categoría">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_image" class="form-label">Categoría</label>
+                        <input type="text" class="form-control" id="edit_image" name="image" placeholder="Url">
+                    </div>
+                  
+                    <button type="submit" class="btn btn-info">Aceptar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class=" container">
+
+
+<div class=" container">
         <h2 class="m-3">Libros existentes</h2>
 
         <!-- Se añade data-bs-toggle="modal" data-bs-target="#addBookModal" para abrir modal -->
@@ -171,7 +219,7 @@ class Book {
                          <h6 class="card-text"><?php echo $row['category']; ?></h6><br>
                          <!-- Botón para eliminar el libro y modificar-->
                          <button class="btn btn-outline-danger" onclick="deleteBook('<?php echo $row['name']; ?>', '<?php echo $row['author']; ?>', '<?php echo $row['category']; ?>', '<?php echo $row['image']; ?>')">Eliminar</button>
-                         <button type="button" class="btn btn-outline-warning">Warning</button>
+                         <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#addBookModalEdit"  onclick="editBook('<?php echo $row['name']; ?>', '<?php echo $row['author']; ?>', '<?php echo $row['category']; ?>', '<?php echo $row['image']; ?>')">Editar</button>
                       </div>
                     </div>
                 </div>
@@ -182,6 +230,20 @@ class Book {
     </div>
     </div>
 
+    <!-- Editar -->
+    <script>
+    function editBook(name, author, category, image) {
+
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_author').value = author;
+    document.getElementById('edit_category').value = category;
+    document.getElementById('edit_image').value = image;
+
+   
+    var modal = new bootstrap.Modal(document.getElementById('addBookModalEdit'));
+    modal.show();
+}
+</script>
 
 
 
