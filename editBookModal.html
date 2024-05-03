@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+<!-- Modal para editar libro-->
+<div class="modal fade" id="addBookModalEdit" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+             <h5 class="modal-title" id="addBookModalLabel">Editar Libro</h5>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <div class="modal-body">
+                <form id="editBookForm" method="post" action="book.php">
+                  <!-- Campo oculto para almacenar el valor de $oldName -->
+                  <input type="hidden" id="old_name" name="old_name">
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="edit_name" name="name" placeholder="Ingresa el título" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_author" class="form-label">Autor</label>
+                        <input type="text" class="form-control" id="edit_author" name="author" placeholder="Ingresa el nombre del autor" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_category" class="form-label">Categoría</label>
+                        <input type="text" class="form-control" id="edit_category" name="category" placeholder="Categoría">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_image" class="form-label">Image</label>
+                        <input type="text" class="form-control" id="edit_image" name="image" placeholder="Url">
+                    </div>
+                  
+                    <button type="submit" name="editBook" class="btn btn-info">Aceptar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

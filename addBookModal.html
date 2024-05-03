@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+     <!-- Modal para gregar libro-->
+<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addBookModalLabel">Agregar Nuevo Libro</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addBookForm" method="post">
+          <div class="mb-3">
+            <label for="name" class="form-label">Título</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Ingresa el título" require>
+          </div>
+          <div class="mb-3">
+            <label for="author" class="form-label">Autor</label>
+            <input type="text" class="form-control" id="author" name="author" placeholder="Ingresa el nombre del autor" require>
+          </div>
+          <div class="mb-3">
+            <label for="category" class="form-label">Categoría</label>
+            <input type="text" class="form-control" id="category" name="category" placeholder="Categoría">
+          </div>
+          <div class="mb-3">
+            <label for="image" class="form-label">Image</label>
+            <input type="text" class="form-control" id="image" name="image" placeholder="Url">
+          </div>
+          <button type="submit"  name="addBook" class="btn btn-info">Agregar Libro</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

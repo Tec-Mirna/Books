@@ -1,17 +1,34 @@
 <?php
 
 class Book {
+    
     public $name;
     public $author;
     public $category;
     public $image;
 
+    /* Constructor */
     public function __construct($name, $author, $category, $image){
+       
         $this->name = $name;
         $this->author = $author;
         $this->category = $category;
         $this->image = $image;
     }
+
+    // Función para configurar la solicitud cURL(get, post, put, delete)
+    private function configureCurl($url, $method, $data = null) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+        if ($data) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        return $ch;
+    }
+
+     // Método para crear un libro
     public function createBook(){
         $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr';
 
@@ -21,48 +38,96 @@ class Book {
             'category' => $this->category,
             'image' => $this->image,
         );
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data) );
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 
-        $response= curl_exec($ch);
+        $ch = $this->configureCurl($url, 'POST', $data);
+        $response = curl_exec($ch);
         curl_close($ch);
         echo $response;
     }
 
+ // Método para actualizar un libro
+ public function updateBook($oldName) {
+    $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr/name/' . urlencode($oldName);
+    $data = array(
+        'name' => $this->name,
+        'author' => $this->author,
+        'category' => $this->category,
+        'image' => $this->image,
+    );
+    $ch = $this->configureCurl($url, 'PUT', $data);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    echo $response;
+}
     
 
+
+  // Método para eliminar un libro
+  public function deleteBook() {
+    $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr/name/' . urlencode($this->name);
+    $ch = $this->configureCurl($url, 'DELETE');
+    $response = curl_exec($ch);
+    curl_close($ch);
+    return $response;
+}
+    
+
+
    //Obtener libros
-    public function get_books(){
-        $response = file_get_contents('https://sheetdb.io/api/v1/qvsm8ms7oiqkr');
-        return $response;
+    public static  function get_books(){
+        return file_get_contents('https://sheetdb.io/api/v1/qvsm8ms7oiqkr');
+
     }
 
- 
-
- 
-       
+        
 }
 
    // Verificar si se ha enviado el formulario de agregar un nuevo libro
    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addBook"])) {
+  
     $name = $_POST["name"];
     $author = $_POST["author"];
     $category = $_POST["category"];
     $image = $_POST["image"];
 
     // Crear un nuevo objeto Book y agregar el libro
-    $book = new Book($name, $author, $category, $image);
+    $book = new Book( $name, $author, $category, $image);
     $book->createBook();
    }
+   
+// Verificar si se ha enviado el formulario de editar un libro
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editBook"])) {
+    
+    $name = $_POST["name"];
+    $author = $_POST["author"];
+    $category = $_POST["category"];
+    $image = $_POST["image"];
+ 
+
+    // Crear un nuevo objeto Book y actualizar el libro
+    $book = new Book($name, $author, $category, $image);
+    $book->updateBook($name );
+}
 
 
+// Eliminar
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
+    // Obtener los datos del libro a eliminar
+    $name = $_POST["name"];
+    $author = $_POST["author"];
+    $category = $_POST["category"];
+    $image = $_POST["image"];
+
+    // Crear un nuevo objeto Book y eliminar el libro
+    $book = new Book($name, $author, $category, $image);
+    $response = $book->deleteBook();
+
+    // Devolver la respuesta al cliente
+    echo $response;
+    exit(); // Salir del script después de enviar la respuesta
+}
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -74,30 +139,12 @@ class Book {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-<style>
-    .nav-color{
-        background: #EFEFBB;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to right, #D4D3DD, #EFEFBB);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to right, #D4D3DD, #EFEFBB); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-    }
-    .img{
-        width: auto;
-    }
-    .add_btn{
-        margin: 20px;
-    }
-    .card-b{
-        border-color: white;
-    }
-  
-   
-
-   
-</style>
+<link rel="stylesheet" href="style.css">
 
 </head>
+
 <body> 
+
 <nav class="navbar bg-body-tertiary nav-color">
   <div class="container-fluid">
   <a class="navbar-brand ">
@@ -111,80 +158,14 @@ class Book {
 </nav>
 
 
-   <!-- Modal para gregar libro-->
-<div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addBookModalLabel">Agregar Nuevo Libro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="addBookForm" method="post">
-          <div class="mb-3">
-            <label for="name" class="form-label">Título</label>
-            <input type="text" class="form-control" id="name" name="name" placeholder="Ingresa el título" require>
-          </div>
-          <div class="mb-3">
-            <label for="author" class="form-label">Autor</label>
-            <input type="text" class="form-control" id="author" name="author" placeholder="Ingresa el nombre del autor" require>
-          </div>
-          <div class="mb-3">
-            <label for="category" class="form-label">Categoría</label>
-            <input type="text" class="form-control" id="category" name="category" placeholder="Categoría">
-          </div>
-          <div class="mb-3">
-            <label for="image" class="form-label">Categoría</label>
-            <input type="text" class="form-control" id="image" name="image" placeholder="Url">
-          </div>
-          <button type="submit"  name="addBook" class="btn btn-info">Agregar Libro</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-
- <!-- Modal para editar libro-->
- <div class="modal fade" id="addBookModalEdit" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addBookModalLabel">Editar Libro</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editBookForm" method="post" action="book.php">
-            
-                    <div class="mb-3">
-                        <label for="edit_name" class="form-label">Título</label>
-                        <input type="text" class="form-control" id="edit_name" name="name" placeholder="Ingresa el título" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_author" class="form-label">Autor</label>
-                        <input type="text" class="form-control" id="edit_author" name="author" placeholder="Ingresa el nombre del autor" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_category" class="form-label">Categoría</label>
-                        <input type="text" class="form-control" id="edit_category" name="category" placeholder="Categoría">
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_image" class="form-label">Categoría</label>
-                        <input type="text" class="form-control" id="edit_image" name="image" placeholder="Url">
-                    </div>
-                  
-                    <button type="submit" class="btn btn-info">Aceptar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+  <?php
+ include_once 'addBookModal.html';
+ include_once 'editBookModal.html';
+  ?>
 
 
 <div class=" container">
         <h2 class="m-3">Libros existentes</h2>
-
         <!-- Se añade data-bs-toggle="modal" data-bs-target="#addBookModal" para abrir modal -->
         <button 
             class="btn btn-success add_btn" 
@@ -232,22 +213,52 @@ class Book {
 
     <!-- Editar -->
     <script>
-    function editBook(name, author, category, image) {
-
+   function editBook(name, author, category, image) {
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_author').value = author;
     document.getElementById('edit_category').value = category;
     document.getElementById('edit_image').value = image;
-
-   
+    document.getElementById('old_name').value = name; // Establece el valor de oldName
     var modal = new bootstrap.Modal(document.getElementById('addBookModalEdit'));
+    console.error();
     modal.show();
 }
+
+/* Ekiminar */
+
+
+  function deleteBook(name, author, category, image) {
+    if (confirm('¿Estás seguro de que deseas eliminar este libro?')) {
+        // Construye el objeto de datos a enviar
+        var data = {
+            name: name,
+            author: author,
+            category: category,
+            image: image
+        };
+
+        // Envía una solicitud AJAX al servidor para eliminar el libro
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'book.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Maneja la respuesta del servidor
+                var response = xhr.responseText;
+                if (response === 'success') {
+                    // Actualiza la interfaz de usuario según sea necesario
+                    location.reload(); // Recarga la página después de la eliminación exitosa
+                } else {
+                    alert('Error al eliminar el libro');
+                }
+            }
+        };
+        // Envía los datos del libro a eliminar al servidor en formato JSON
+        xhr.send(JSON.stringify(data));
+    }
+}
+
 </script>
-
-
-
-
 
 </body>
 </html>
