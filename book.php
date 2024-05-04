@@ -1,15 +1,15 @@
 <?php
 
 class Book {
-    
+    public $id;
     public $name;
     public $author;
     public $category;
     public $image;
 
     /* Constructor */
-    public function __construct($name, $author, $category, $image){
-       
+    public function __construct($id, $name, $author, $category, $image){
+        $this->id = $id;
         $this->name = $name;
         $this->author = $author;
         $this->category = $category;
@@ -33,6 +33,7 @@ class Book {
         $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr';
 
         $data = array(
+            'id' => $this->id,
             'name' => $this->name,
             'author' => $this->author,
             'category' => $this->category,
@@ -63,12 +64,14 @@ class Book {
 
 
   // Método para eliminar un libro
-  public function deleteBook() {
-    $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr/name/' . urlencode($this->name);
-    $ch = $this->configureCurl($url, 'DELETE');
+  public function deleteBook($id) {
+    $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr/id/' . urlencode($id);
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
     $response = curl_exec($ch);
     curl_close($ch);
     return $response;
+    
 }
     
 
@@ -113,19 +116,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editBook"])) {
 // Eliminar
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
-    // Obtener los datos del libro a eliminar
-    $name = $_POST["name"];
-    $author = $_POST["author"];
-    $category = $_POST["category"];
-    $image = $_POST["image"];
-
-    // Crear un nuevo objeto Book y eliminar el libro
-    $book = new Book($name, $author, $category, $image);
-    $response = $book->deleteBook();
-
-    // Devolver la respuesta al cliente
-    echo $response;
-    exit(); // Salir del script después de enviar la respuesta
+    try {
+        // Obtener el del libro a eliminar
+        $id = $_POST["id"];
+       
+        
+        $book = new Book();
+        $response = $book->deleteBook($id);
+ 
+        exit(); // Salir del script después de enviar la respuesta
+    } catch (Exception $e) {
+        echo "Error al eliminar el libro: " . $e->getMessage();
+    }
 }
 ?>
 
@@ -180,7 +182,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
         <?php
         include_once './book.php';
 
-        $books = new Book(null, null, null, null);
+        $books = new Book(null, null, null, null, null);
         $response = $books->get_books();
         $data = json_decode($response, true);
 
@@ -198,8 +200,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
                          <h6 class="card-text"><?php echo $row['author']; ?></h5>
                          <p>Categoría:</p>
                          <h6 class="card-text"><?php echo $row['category']; ?></h6><br>
-                         <!-- Botón para eliminar el libro y modificar-->
-                         <button class="btn btn-outline-danger" onclick="deleteBook('<?php echo $row['name']; ?>', '<?php echo $row['author']; ?>', '<?php echo $row['category']; ?>', '<?php echo $row['image']; ?>')">Eliminar</button>
+                         <!-- Botón para eliminar el libro y modificar-->       <!--atributo: data-bookid almacena el ID del libro asociado al botón de eliminar -->
+                         <button class=" btn btn-outline-danger btn-delete"  data-bookid="<?php echo $row['id']; ?>">Eliminar</button>
                          <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#addBookModalEdit"  onclick="editBook('<?php echo $row['name']; ?>', '<?php echo $row['author']; ?>', '<?php echo $row['category']; ?>', '<?php echo $row['image']; ?>')">Editar</button>
                       </div>
                     </div>
@@ -224,40 +226,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
     modal.show();
 }
 
-/* Ekiminar */
+/* Eliminar */
 
 
-  function deleteBook(name, author, category, image) {
-    if (confirm('¿Estás seguro de que deseas eliminar este libro?')) {
-        // Construye el objeto de datos a enviar
-        var data = {
-            name: name,
-            author: author,
-            category: category,
-            image: image
-        };
+// Función para eliminar un libro por ID
+function deleteBook(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar este libro?')) {
+            const endpoint = `https://sheetdb.io/api/v1/qvsm8ms7oiqkr/id/${id}`;
 
-        // Envía una solicitud AJAX al servidor para eliminar el libro
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'book.php', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                // Maneja la respuesta del servidor
-                var response = xhr.responseText;
-                if (response === 'success') {
-                    // Actualiza la interfaz de usuario según sea necesario
-                    location.reload(); // Recarga la página después de la eliminación exitosa
+            fetch(endpoint, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                
+                    location.reload(); 
                 } else {
-                    alert('Error al eliminar el libro');
+                    throw new Error('Error al eliminar el libro');
                 }
-            }
-        };
-        // Envía los datos del libro a eliminar al servidor en formato JSON
-        xhr.send(JSON.stringify(data));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Errooooooooorrrr al eliminar el libro');
+            });
+        }
     }
-}
 
+    // Agrega un evento clic a todos los botones de eliminación atributo (data-bookid) inicia con data-seguidodeloquesea
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-bookid');
+            deleteBook(id);
+        });
+    });
 </script>
 
 </body>
