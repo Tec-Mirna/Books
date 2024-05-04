@@ -18,8 +18,8 @@
         </div>
             <div class="modal-body">
                 <form id="editBookForm" method="post" action="book.php">
-                  <!-- Campo oculto para almacenar el valor de $oldName -->
-                  <input type="hidden" id="old_name" name="old_name">
+                  <!-- Campo oculto para almacenar el valor de $id -->
+                  <input type="hidden" id="book_id" name="id">
                     <div class="mb-3">
                         <label for="edit_name" class="form-label">Título</label>
                         <input type="text" class="form-control" id="edit_name" name="name" placeholder="Ingresa el título" required>
@@ -37,7 +37,7 @@
                         <input type="text" class="form-control" id="edit_image" name="image" placeholder="Url">
                     </div>
                   
-                    <button type="submit" name="editBook" class="btn btn-info">Aceptar</button>
+                    <button type="submit" name="editBook" class="btn btn-info">Guardar cambios</button>
                 </form>
             </div>
         </div>

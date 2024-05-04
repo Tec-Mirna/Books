@@ -46,10 +46,11 @@ class Book {
         echo $response;
     }
 
- // Método para actualizar un libro
- public function updateBook($oldName) {
-    $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr/name/' . urlencode($oldName);
+   // Método para actualizar un libro
+   public function updateBook($id) {
+    $url = 'https://sheetdb.io/api/v1/qvsm8ms7oiqkr/id/' . urlencode($id);
     $data = array(
+        'id' => $this->id,
         'name' => $this->name,
         'author' => $this->author,
         'category' => $this->category,
@@ -59,7 +60,7 @@ class Book {
     $response = curl_exec($ch);
     curl_close($ch);
     echo $response;
-}
+   }
     
 
 
@@ -85,42 +86,44 @@ class Book {
         
 }
 
+   // AGREGAR
    // Verificar si se ha enviado el formulario de agregar un nuevo libro
    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addBook"])) {
-  
+    $id = $_POST["id"];
     $name = $_POST["name"];
     $author = $_POST["author"];
     $category = $_POST["category"];
     $image = $_POST["image"];
 
     // Crear un nuevo objeto Book y agregar el libro
-    $book = new Book( $name, $author, $category, $image);
+    $book = new Book($id, $name, $author, $category, $image);
     $book->createBook();
    }
    
-// Verificar si se ha enviado el formulario de editar un libro
+   // EDITAR
+   // Verificar si se ha enviado el formulario de editar un libro
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["editBook"])) {
-    
-    $name = $_POST["name"];
-    $author = $_POST["author"];
-    $category = $_POST["category"];
-    $image = $_POST["image"];
+     // Obtener los datos del formulario
+     $id = $_POST["id"];
+     $name = $_POST["name"]; 
+     $author = $_POST["author"]; 
+     $category = $_POST["category"]; 
+     $image = $_POST["image"]; 
  
+  
 
     // Crear un nuevo objeto Book y actualizar el libro
-    $book = new Book($name, $author, $category, $image);
-    $book->updateBook($name );
+    $book = new Book($id, $name, $author, $category, $image);
+    $book->updateBook($id);
+    
 }
 
-
-// Eliminar
-
+    // ELIMINAR
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
     try {
-        // Obtener el del libro a eliminar
+        // Obtener el id del libro a eliminar
         $id = $_POST["id"];
        
-        
         $book = new Book();
         $response = $book->deleteBook($id);
  
@@ -194,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
                        <img src="<?php echo $row['image']; ?>" class="card-img-top" alt="...">
                     </div>
                     <div class="col-md-8">
-                      <div class="card-body"><br>
+                      <div class="card-body">
                          <h5 class="card-title"><?php echo $row['name']; ?></h5>
                          <p>Autor:</p>
                          <h6 class="card-text"><?php echo $row['author']; ?></h5>
@@ -202,7 +205,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
                          <h6 class="card-text"><?php echo $row['category']; ?></h6><br>
                          <!-- Botón para eliminar el libro y modificar-->       <!--atributo: data-bookid almacena el ID del libro asociado al botón de eliminar -->
                          <button class=" btn btn-outline-danger btn-delete"  data-bookid="<?php echo $row['id']; ?>">Eliminar</button>
-                         <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#addBookModalEdit"  onclick="editBook('<?php echo $row['name']; ?>', '<?php echo $row['author']; ?>', '<?php echo $row['category']; ?>', '<?php echo $row['image']; ?>')">Editar</button>
+                         <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#addBookModalEdit"  onclick="editBook('<?php echo $row['id']; ?>', '<?php echo $row['name']; ?>', '<?php echo $row['author']; ?>', '<?php echo $row['category']; ?>', '<?php echo $row['image']; ?>')">Editar</button>
                       </div>
                     </div>
                 </div>
@@ -214,23 +217,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["deleteBook"])) {
     </div>
 
     <!-- Editar -->
-    <script>
-   function editBook(name, author, category, image) {
+<script>
+    function editBook(id, name, author, category, image) {
+    document.getElementById('book_id').value = id; 
     document.getElementById('edit_name').value = name;
     document.getElementById('edit_author').value = author;
     document.getElementById('edit_category').value = category;
     document.getElementById('edit_image').value = image;
-    document.getElementById('old_name').value = name; // Establece el valor de oldName
+ 
     var modal = new bootstrap.Modal(document.getElementById('addBookModalEdit'));
-    console.error();
     modal.show();
-}
-
-/* Eliminar */
+   }
 
 
-// Función para eliminar un libro por ID
-function deleteBook(id) {
+   /* Eliminar por id */
+    function deleteBook(id) {
         if (confirm('¿Estás seguro de que deseas eliminar este libro?')) {
             const endpoint = `https://sheetdb.io/api/v1/qvsm8ms7oiqkr/id/${id}`;
 
@@ -247,7 +248,7 @@ function deleteBook(id) {
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Errooooooooorrrr al eliminar el libro');
+                alert('Error al eliminar el libro');
             });
         }
     }
