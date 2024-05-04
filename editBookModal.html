@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
 </head>
 <body>
     
@@ -43,6 +44,23 @@
         </div>
     </div>
 </div>
+
+
+
+
+<script>
+     /* Editar */
+     function editBook(id, name, author, category, image) {
+    document.getElementById('book_id').value = id; 
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_author').value = author;
+    document.getElementById('edit_category').value = category;
+    document.getElementById('edit_image').value = image;
+ 
+    var modal = new bootstrap.Modal(document.getElementById('addBookModalEdit'));
+    modal.show();
+   }
+</script>
 
 </body>
 </html>
